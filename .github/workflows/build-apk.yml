@@ -7,54 +7,17 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf \
-            libtool pkg-config zlib1g-dev libncurses-dev \
-            cmake libffi-dev libssl-dev libltdl-dev ccache
-
-      - name: Install Buildozer
-        run: |
-          pip3 install --user buildozer
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-
+      - uses: actions/checkout@v4
       - name: Build APK
-        id: build
-        continue-on-error: true
-        run: |
-          cd ${{ github.workspace }}
-          buildozer android debug --verbose 2>&1 | tee build.log
-          exit ${PIPESTATUS[0]}
-
-      - name: Upload build log
-        if: always()
-        uses: actions/upload-artifact@v4
+        uses: digreatbrian/buildozer-action@v2
         with:
-          name: build-log
-          path: build.log
-          retention-days: 7
-
-      - name: Show APK result
-        if: always()
-        run: |
-          ls -la bin/ 2>/dev/null || echo "No APK generated"
-          echo "Build step status: ${{ steps.build.outcome }}"
-
+          python-version: "3.11"
+          buildozer-cmd: buildozer -v android debug
       - name: Upload APK
-        if: steps.build.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: parity-analysis-apk
-          path: bin/*.apk
+          path: ./bin/*.apk
           retention-days: 30
