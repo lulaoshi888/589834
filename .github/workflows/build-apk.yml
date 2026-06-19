@@ -16,11 +16,10 @@ jobs:
         run: |
           docker pull ghcr.io/kivy/buildozer:latest
           docker run --rm \
-            -e BUILDOZER_ALLOW_ROOT=1 \
             -v ${{ github.workspace }}:/app \
             -w /app \
             ghcr.io/kivy/buildozer:latest \
-            bash -c "buildozer android debug --verbose" 2>&1 | tee build.log
+            bash -c "echo y | buildozer android debug --verbose" 2>&1 | tee build.log
 
       - name: Upload build log
         if: always()
